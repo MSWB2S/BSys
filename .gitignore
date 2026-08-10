@@ -1,7 +1,11 @@
 # Intermediate
 *.obj
 *.exe
+*.pdb
+*.ilk
 
 # Directories
 Bin/
 build/
+obj/
+*.zip

@@ -104,6 +104,12 @@ std::string makeCompileCommand(
             << include
             << "\" ";
 
+    if (!project.pdb.empty())
+        command
+            << "/Zi /Fd\""
+            << project.pdb
+            << "\" ";
+
     command
         << "/Fo\""
         << object
@@ -262,6 +268,12 @@ int doBuild(const Project& project)
         << " /OUT:\""
         << project.output
         << "\" ";
+
+    if (!project.pdb.empty())
+        linkCommand
+            << "/DEBUG /PDB:\""
+            << project.pdb
+            << "\" ";
 
     for (const auto& object :
          objectFiles) {

@@ -107,6 +107,8 @@ bool parseManifest(
                 project.linkFlags = value;
             else if (key == "message")
                 project.buildMessage = value;
+            else if (key == "pdb")
+                project.pdb = value;
         }
         else if (section == "variables") {
             project.variables[key] = value;

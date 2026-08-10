@@ -29,6 +29,7 @@ struct Project {
     std::string objDir = "build\\obj";
     std::string linkFlags = "/NOLOGO";
     std::string buildMessage;
+    std::string pdb;
 
     std::vector<std::string> defaultFlags;
     std::vector<std::string> defaultDefines;
