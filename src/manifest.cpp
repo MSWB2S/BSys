@@ -101,6 +101,8 @@ bool parseManifest(
                 project.clExe = value;
             else if (key == "link")
                 project.linkExe = value;
+            else if (key == "rc")
+                project.rcExe = value;
             else if (key == "objdir")
                 project.objDir = value;
             else if (key == "linkflags")

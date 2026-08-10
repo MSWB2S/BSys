@@ -17,6 +17,7 @@
 #include <system_error>
 #include <unordered_map>
 #include <vector>
+#include <cctype>
 
 namespace fs = std::filesystem;
 
@@ -24,12 +25,34 @@ namespace wbsys {
 
 namespace {
 
+bool isResourceFile(
+    const std::string& source)
+{
+    std::string extension =
+        fs::path(source)
+            .extension()
+            .string();
+
+    for (auto& character : extension)
+        character =
+            static_cast<char>(
+                std::tolower(
+                    static_cast<unsigned char>(
+                        character)));
+
+    return extension == ".rc";
+}
+
 std::string objectPathFor(
     const Project& project,
     const std::string& source)
 {
     fs::path relative(source);
-    relative.replace_extension(".obj");
+
+    relative.replace_extension(
+        isResourceFile(source)
+            ? ".res"
+            : ".obj");
 
     return (
         fs::path(project.objDir) /
@@ -112,6 +135,54 @@ std::string makeCompileCommand(
 
     command
         << "/Fo\""
+        << object
+        << "\" ";
+
+    command
+        << "\""
+        << file.path
+        << "\"";
+
+    return command.str();
+}
+
+std::string makeResourceCommand(
+    const Project& project,
+    const FileSpec& file,
+    const std::string& object)
+{
+    std::ostringstream command;
+
+    command << project.rcExe << " /nologo ";
+
+    for (const auto& define :
+         project.defaultDefines)
+        command << "/d" << define << ' ';
+
+    for (const auto& define :
+         file.defines)
+        command << "/d" << define << ' ';
+
+    for (const auto& include :
+         project.defaultIncludes)
+        command
+            << "/i\""
+            << include
+            << "\" ";
+
+    for (const auto& include :
+         file.includes)
+        command
+            << "/i\""
+            << include
+            << "\" ";
+
+    for (const auto& flag :
+         file.flags)
+        command << flag << ' ';
+
+    command
+        << "/fo\""
         << object
         << "\" ";
 
@@ -237,15 +308,28 @@ int doBuild(const Project& project)
                 file,
                 object);
 
+        const bool resource =
+            isResourceFile(file.path);
+
         const std::string command =
-            makeCompileCommand(
-                project,
-                file,
-                object);
+            resource
+                ? makeResourceCommand(
+                    project,
+                    file,
+                    object)
+                : makeCompileCommand(
+                    project,
+                    file,
+                    object);
+
+        const char* const label =
+            resource
+                ? "[rc]   "
+                : "[cl]   ";
 
         if (showDefaultLine)
             std::cout
-                << "[cl]   "
+                << label
                 << file.path
                 << '\n';
 
@@ -260,7 +344,7 @@ int doBuild(const Project& project)
             if (captureOutput) {
                 if (!showDefaultLine)
                     std::cout
-                        << "[cl]   "
+                        << label
                         << file.path
                         << '\n';
 
@@ -269,7 +353,9 @@ int doBuild(const Project& project)
             }
 
             std::cerr
-                << "WBSys: compile failed ("
+                << "WBSys: "
+                << (resource ? "resource compile" : "compile")
+                << " failed ("
                 << result
                 << "): "
                 << file.path

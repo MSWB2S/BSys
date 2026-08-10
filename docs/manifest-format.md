@@ -48,6 +48,7 @@ One block, global build configuration.
 | `output` | path | `build\out.exe` | Final linked binary |
 | `cl` | path | `cl.exe` | Compiler executable |
 | `link` | path | `link.exe` | Linker executable |
+| `rc` | path | `rc.exe` | Resource compiler, used for any `[file:...]` ending in `.rc` |
 | `objdir` | path | `build\obj` | Root directory for `.obj` output, mirrors source tree |
 | `linkflags` | string | `/NOLOGO` | Flags passed verbatim to the linker |
 | `message` | template | *(empty)* | Printed once, before the build starts — see [build-messages.md](./build-messages.md) |
@@ -103,6 +104,11 @@ includes=include;third_party\include
 One block **per translation unit**. `<path>` is the source file, relative
 to the manifest, and also identifies the object output path
 (`objdir`/`<path with .obj extension>`).
+
+A file ending in `.rc` is routed to `rc.exe` instead of `cl.exe`, and
+its output is a `.res` (not `.obj`) — see
+[resource-files.md](./resource-files.md) for the full behavior. Every
+other extension goes through the normal `cl.exe` path.
 
 | Key | Separator | Behavior |
 | --- | --- | --- |

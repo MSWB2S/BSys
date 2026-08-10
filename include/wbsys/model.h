@@ -33,6 +33,7 @@ struct Project {
     std::string output = "build\\out.exe";
     std::string clExe = "cl.exe";
     std::string linkExe = "link.exe";
+    std::string rcExe = "rc.exe";
     std::string objDir = "build\\obj";
     std::string linkFlags = "/NOLOGO";
     std::string buildMessage;

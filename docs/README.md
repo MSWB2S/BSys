@@ -10,6 +10,7 @@ down by topic.
 | [`build-messages.md`](./build-messages.md) | `message` vs `compile_msg`, template variables, per-file overrides |
 | [`verbosity.md`](./verbosity.md) | The three console output modes and when each line prints |
 | [`debug-symbols.md`](./debug-symbols.md) | The `pdb` option and the `/Zi` `/Fd` `/DEBUG` `/PDB` flags it emits |
+| [`resource-files.md`](./resource-files.md) | Compiling `.rc` files with `rc.exe` and linking the resulting `.res` |
 | [`examples/`](./examples) | Full, runnable `.ini` manifests for common setups |
 
 > [!TIP]
