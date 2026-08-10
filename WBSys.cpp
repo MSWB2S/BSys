@@ -184,7 +184,7 @@ static std::string objPathFor(const Project& proj, const std::string& srcRel) {
 }
 
 static bool needsRebuild(const std::string& src, const std::string& obj) {
-    if (!fs::exists(obj)) return true;
+    if (!fs::is_regular_file(obj)) return true;
     auto srcTime = fs::last_write_time(src);
     auto objTime = fs::last_write_time(obj);
     return srcTime > objTime;
