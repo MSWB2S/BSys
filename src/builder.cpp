@@ -8,11 +8,14 @@
 
 #include "wbsys/builder.h"
 #include "wbsys/process.h"
+#include "wbsys/utility.h"
 
 #include <filesystem>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <system_error>
+#include <unordered_map>
 #include <vector>
 
 namespace fs = std::filesystem;
@@ -28,7 +31,10 @@ std::string objectPathFor(
     fs::path relative(source);
     relative.replace_extension(".obj");
 
-    return (fs::path(project.objDir) / relative).string();
+    return (
+        fs::path(project.objDir) /
+        relative
+    ).string();
 }
 
 bool needsRebuild(
@@ -41,13 +47,17 @@ bool needsRebuild(
         return true;
 
     const auto sourceTime =
-        fs::last_write_time(source, error);
+        fs::last_write_time(
+            source,
+            error);
 
     if (error)
         return true;
 
     const auto objectTime =
-        fs::last_write_time(object, error);
+        fs::last_write_time(
+            object,
+            error);
 
     if (error)
         return true;
@@ -64,44 +74,120 @@ std::string makeCompileCommand(
 
     command << project.clExe << " /c ";
 
-    for (const auto& flag : project.defaultFlags)
+    for (const auto& flag :
+         project.defaultFlags)
         command << flag << ' ';
 
-    for (const auto& flag : file.flags)
+    for (const auto& flag :
+         file.flags)
         command << flag << ' ';
 
-    for (const auto& define : project.defaultDefines)
+    for (const auto& define :
+         project.defaultDefines)
         command << "/D" << define << ' ';
 
-    for (const auto& define : file.defines)
+    for (const auto& define :
+         file.defines)
         command << "/D" << define << ' ';
 
-    for (const auto& include : project.defaultIncludes)
-        command << "/I\"" << include << "\" ";
+    for (const auto& include :
+         project.defaultIncludes)
+        command
+            << "/I\""
+            << include
+            << "\" ";
 
-    for (const auto& include : file.includes)
-        command << "/I\"" << include << "\" ";
+    for (const auto& include :
+         file.includes)
+        command
+            << "/I\""
+            << include
+            << "\" ";
 
-    command << "/Fo\"" << object << "\" ";
-    command << "\"" << file.path << "\"";
+    command
+        << "/Fo\""
+        << object
+        << "\" ";
+
+    command
+        << "\""
+        << file.path
+        << "\"";
 
     return command.str();
+}
+
+std::unordered_map<std::string, std::string>
+makeVariables(
+    const Project& project,
+    const std::string& file = {},
+    const std::string& object = {})
+{
+    std::unordered_map<std::string, std::string>
+        variables = project.variables;
+
+    variables["name"] = project.name;
+    variables["output"] = project.output;
+    variables["objdir"] = project.objDir;
+    variables["cl"] = project.clExe;
+    variables["link"] = project.linkExe;
+    variables["file"] = file;
+    variables["object"] = object;
+
+    return variables;
+}
+
+void printBuildMessage(
+    const Project& project)
+{
+    if (project.buildMessage.empty())
+        return;
+
+    std::cout
+        << expandVariables(
+            project.buildMessage,
+            makeVariables(project))
+        << '\n';
+}
+
+void printFileBuildMessage(
+    const Project& project,
+    const FileSpec& file,
+    const std::string& object)
+{
+    if (project.buildMessage.empty())
+        return;
+
+    std::cout
+        << expandVariables(
+            project.buildMessage,
+            makeVariables(
+                project,
+                file.path,
+                object))
+        << '\n';
 }
 
 int doBuild(const Project& project)
 {
     std::error_code error;
 
-    fs::create_directories(project.objDir, error);
+    fs::create_directories(
+        project.objDir,
+        error);
 
     std::vector<std::string> objectFiles;
 
     int built = 0;
     int skipped = 0;
 
+    printBuildMessage(project);
+
     for (const auto& file : project.files) {
         const std::string object =
-            objectPathFor(project, file.path);
+            objectPathFor(
+                project,
+                file.path);
 
         fs::create_directories(
             fs::path(object).parent_path(),
@@ -109,7 +195,10 @@ int doBuild(const Project& project)
 
         objectFiles.push_back(object);
 
-        if (!needsRebuild(file.path, object)) {
+        if (!needsRebuild(
+                file.path,
+                object)) {
+
             std::cout
                 << "[skip] "
                 << file.path
@@ -118,6 +207,11 @@ int doBuild(const Project& project)
             ++skipped;
             continue;
         }
+
+        printFileBuildMessage(
+            project,
+            file,
+            object);
 
         const std::string command =
             makeCompileCommand(
@@ -155,7 +249,8 @@ int doBuild(const Project& project)
         << " (up to date)\n";
 
     fs::create_directories(
-        fs::path(project.output).parent_path(),
+        fs::path(project.output)
+            .parent_path(),
         error);
 
     std::ostringstream linkCommand;
@@ -168,8 +263,14 @@ int doBuild(const Project& project)
         << project.output
         << "\" ";
 
-    for (const auto& object : objectFiles)
-        linkCommand << "\"" << object << "\" ";
+    for (const auto& object :
+         objectFiles) {
+
+        linkCommand
+            << "\""
+            << object
+            << "\" ";
+    }
 
     std::cout
         << "[link] -> "
@@ -177,7 +278,8 @@ int doBuild(const Project& project)
         << '\n';
 
     const int result =
-        runCommand(linkCommand.str());
+        runCommand(
+            linkCommand.str());
 
     if (result != 0) {
         std::cerr
@@ -206,6 +308,7 @@ int build(const Project& project)
 int rebuild(const Project& project)
 {
     clean(project);
+
     return doBuild(project);
 }
 

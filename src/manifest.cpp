@@ -52,24 +52,36 @@ bool parseManifest(
     while (std::getline(input, line)) {
         const std::string raw = trim(line);
 
-        if (raw.empty() || raw[0] == ';' || raw[0] == '#')
+        if (raw.empty() ||
+            raw[0] == ';' ||
+            raw[0] == '#')
             continue;
 
-        if (raw.front() == '[' && raw.back() == ']') {
+        if (raw.front() == '[' &&
+            raw.back() == ']') {
+
             currentFile = nullptr;
-            section = trim(raw.substr(1, raw.size() - 2));
+
+            section =
+                trim(raw.substr(
+                    1,
+                    raw.size() - 2));
 
             if (section.rfind("file:", 0) == 0) {
                 project.files.push_back({});
 
-                currentFile = &project.files.back();
-                currentFile->path = trim(section.substr(5));
+                currentFile =
+                    &project.files.back();
+
+                currentFile->path =
+                    trim(section.substr(5));
             }
 
             continue;
         }
 
-        const size_t equals = raw.find('=');
+        const size_t equals =
+            raw.find('=');
 
         if (equals == std::string::npos)
             continue;
@@ -93,22 +105,35 @@ bool parseManifest(
                 project.objDir = value;
             else if (key == "linkflags")
                 project.linkFlags = value;
+            else if (key == "message")
+                project.buildMessage = value;
+        }
+        else if (section == "variables") {
+            project.variables[key] = value;
         }
         else if (section == "defaults") {
             if (key == "flags")
-                parseFlags(value, project.defaultFlags);
+                parseFlags(
+                    value,
+                    project.defaultFlags);
             else if (key == "defines")
-                project.defaultDefines = splitSemicolons(value);
+                project.defaultDefines =
+                    splitSemicolons(value);
             else if (key == "includes")
-                project.defaultIncludes = splitSemicolons(value);
+                project.defaultIncludes =
+                    splitSemicolons(value);
         }
         else if (currentFile) {
             if (key == "flags")
-                parseFlags(value, currentFile->flags);
+                parseFlags(
+                    value,
+                    currentFile->flags);
             else if (key == "defines")
-                currentFile->defines = splitSemicolons(value);
+                currentFile->defines =
+                    splitSemicolons(value);
             else if (key == "includes")
-                currentFile->includes = splitSemicolons(value);
+                currentFile->includes =
+                    splitSemicolons(value);
         }
     }
 

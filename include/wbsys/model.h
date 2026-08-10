@@ -9,6 +9,7 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace wbsys {
@@ -27,10 +28,13 @@ struct Project {
     std::string linkExe = "link.exe";
     std::string objDir = "build\\obj";
     std::string linkFlags = "/NOLOGO";
+    std::string buildMessage;
 
     std::vector<std::string> defaultFlags;
     std::vector<std::string> defaultDefines;
     std::vector<std::string> defaultIncludes;
+
+    std::unordered_map<std::string, std::string> variables;
 
     std::vector<FileSpec> files;
 };

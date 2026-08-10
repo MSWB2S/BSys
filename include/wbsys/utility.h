@@ -9,11 +9,18 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace wbsys {
 
 std::string trim(const std::string& value);
-std::vector<std::string> splitSemicolons(const std::string& value);
+
+std::vector<std::string> splitSemicolons(
+    const std::string& value);
+
+std::string expandVariables(
+    const std::string& value,
+    const std::unordered_map<std::string, std::string>& variables);
 
 } // namespace wbsys
