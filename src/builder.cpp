@@ -161,17 +161,12 @@ void printFileBuildMessage(
     const FileSpec& file,
     const std::string& object)
 {
-    const std::string& message =
-        !file.compileMessage.empty()
-            ? file.compileMessage
-            : project.buildMessage;
-
-    if (message.empty())
+    if (file.compileMessage.empty())
         return;
 
     std::cout
         << expandVariables(
-            message,
+            file.compileMessage,
             makeVariables(
                 project,
                 file.path,
@@ -219,10 +214,28 @@ int doBuild(const Project& project)
             continue;
         }
 
-        printFileBuildMessage(
-            project,
-            file,
-            object);
+        const bool hasCustomMessage =
+            !file.compileMessage.empty();
+
+        const bool showCustomMessage =
+            hasCustomMessage &&
+            project.verbosity != Verbosity::ErrorsOnly;
+
+        const bool showDefaultLine =
+            project.verbosity == Verbosity::All ||
+            (project.verbosity == Verbosity::Normal &&
+             !hasCustomMessage);
+
+        const bool captureOutput =
+            project.verbosity == Verbosity::ErrorsOnly ||
+            (project.verbosity == Verbosity::Normal &&
+             hasCustomMessage);
+
+        if (showCustomMessage)
+            printFileBuildMessage(
+                project,
+                file,
+                object);
 
         const std::string command =
             makeCompileCommand(
@@ -230,15 +243,31 @@ int doBuild(const Project& project)
                 file,
                 object);
 
-        std::cout
-            << "[cl]   "
-            << file.path
-            << '\n';
+        if (showDefaultLine)
+            std::cout
+                << "[cl]   "
+                << file.path
+                << '\n';
+
+        std::string capturedOutput;
 
         const int result =
-            runCommand(command);
+            runCommand(
+                command,
+                captureOutput ? &capturedOutput : nullptr);
 
         if (result != 0) {
+            if (captureOutput) {
+                if (!showDefaultLine)
+                    std::cout
+                        << "[cl]   "
+                        << file.path
+                        << '\n';
+
+                if (!capturedOutput.empty())
+                    std::cout << capturedOutput;
+            }
+
             std::cerr
                 << "WBSys: compile failed ("
                 << result

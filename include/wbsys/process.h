@@ -12,6 +12,6 @@
 
 namespace wbsys {
 
-int runCommand(const std::string& commandLine);
+int runCommand(const std::string& commandLine, std::string* output = nullptr);
 
 } // namespace wbsys

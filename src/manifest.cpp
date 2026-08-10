@@ -109,6 +109,14 @@ bool parseManifest(
                 project.buildMessage = value;
             else if (key == "pdb")
                 project.pdb = value;
+            else if (key == "verbosity") {
+                if (value == "all")
+                    project.verbosity = Verbosity::All;
+                else if (value == "errors")
+                    project.verbosity = Verbosity::ErrorsOnly;
+                else
+                    project.verbosity = Verbosity::Normal;
+            }
         }
         else if (section == "variables") {
             project.variables[key] = value;

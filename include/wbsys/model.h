@@ -14,6 +14,12 @@
 
 namespace wbsys {
 
+enum class Verbosity {
+    Normal,
+    All,
+    ErrorsOnly,
+};
+
 struct FileSpec {
     std::string path;
     std::vector<std::string> flags;
@@ -31,6 +37,7 @@ struct Project {
     std::string linkFlags = "/NOLOGO";
     std::string buildMessage;
     std::string pdb;
+    Verbosity verbosity = Verbosity::Normal;
 
     std::vector<std::string> defaultFlags;
     std::vector<std::string> defaultDefines;
