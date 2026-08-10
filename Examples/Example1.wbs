@@ -1,0 +1,20 @@
+[project]
+name    = Windows
+output  = build\Windows.exe
+cl      = cl.exe
+link    = link.exe
+objdir  = build\obj
+linkflags = /NOLOGO /SUBSYSTEM:CONSOLE
+
+[defaults]
+flags   = /nologo /c / EHsc
+defines = WIN32;_WINDOWS
+includes = include;src
+
+[file:src/main.cpp]
+flags   = /O2 /GL
+defines = RELEASE
+
+[file:src/legacy.cpp]
+flags   = /Od /Oy-
+defines = DEBUG_LEGACY
