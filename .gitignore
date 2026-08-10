@@ -1,2 +1,6 @@
 # Intermediate
 *.obj
+*.exe
+
+# Directories
+Bin/
