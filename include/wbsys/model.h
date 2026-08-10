@@ -19,6 +19,7 @@ struct FileSpec {
     std::vector<std::string> flags;
     std::vector<std::string> defines;
     std::vector<std::string> includes;
+    std::string compileMessage;
 };
 
 struct Project {

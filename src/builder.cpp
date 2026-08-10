@@ -161,12 +161,17 @@ void printFileBuildMessage(
     const FileSpec& file,
     const std::string& object)
 {
-    if (project.buildMessage.empty())
+    const std::string& message =
+        !file.compileMessage.empty()
+            ? file.compileMessage
+            : project.buildMessage;
+
+    if (message.empty())
         return;
 
     std::cout
         << expandVariables(
-            project.buildMessage,
+            message,
             makeVariables(
                 project,
                 file.path,

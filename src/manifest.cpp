@@ -136,6 +136,8 @@ bool parseManifest(
             else if (key == "includes")
                 currentFile->includes =
                     splitSemicolons(value);
+            else if (key == "compile_msg")
+                currentFile->compileMessage = value;
         }
     }
 
