@@ -282,6 +282,11 @@ int main(int argc, char** argv) {
 
     Project proj = parseManifest(manifestPath);
 
+    // Fix path issues
+    // change work dir to manifest folder
+    fs::path manifestDir = fs::absolute(fs::path(manifestPath)).parent_path();
+    SetCurrentDirectoryA(manifestDir.string().c_str());
+
     if (proj.files.empty()) {
         std::cerr << "WBSys: manifest has no [file:...] sections\n";
         return 1;
